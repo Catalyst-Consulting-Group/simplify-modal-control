@@ -1,2 +1,163 @@
 # simplify-modal-control
-Simplify React modal control flow
+
+Like the name suggested, this library is created to simplify modal control flow for React. Note, this library is for controlling modals, you still have to pick your favorite modal component as the wrapper.
+
+# Features
+
+- Handle open and close modal
+- Pass props into modal content
+- Declare reusable modals and access it using selector keys in any layer
+- Prevent data flickering during modal transition
+- Prevent re-rendering when modal is in close state
+- Super customizable, not tied to any modal components
+- ZERO dependencies beside React v16.8.0 or above
+- Extremely lightweight, just ~10 KB in package size
+- Written in TypeScript, every pieces are well Typed!
+
+# Problems Addressed
+
+In React world, normally when you want to use a modal, you'll have to go through the process of declaring a openModal state, creating open and close handlers, and finally returning the modal and content component in the component block. This process is tedious and cause several issues:
+
+- Lots of boilerplate codes
+- Hard to reuse and pass around props into the modal
+- Introduce extra re-rendering caused by the parent component
+- Modal component continue to trigger re-rendering in close state
+- Modal content flickering during close transition caused by change modal state
+
+This library will resolve all the above issues by introduce a simpler modal control flow.
+
+# Quick Usage
+
+```tsx
+// use MUI Dialog as Example, choose you favorite component wrapper
+import { Dialog, DialogContent } from "@mui/material";
+
+// define your modal
+const MyModal = ({
+  onClose,
+  customMessage,
+}: DefaultModalProps & {
+  customMessage: string;
+}) => {
+  return (
+    <>
+      <DialogContent>
+        <span>Modal Content: {customMessage}</span>
+        <button onClick={onClose}>Close</button>
+      </DialogContent>
+    </>
+  );
+};
+
+// construct modal controls
+const {
+  useModal,
+  useModalContextSelector,
+  useModalContext,
+  ModalContextProvider,
+} = makeModalControlSimpler({
+  ModalWrapper: Dialog,
+  // pass props to modal wrapper
+  mapModalProps: ({ open, handleClose }, modalProps) => ({
+    open,
+    onClose: customProps?.disableBackdropClick ? undefined : handleClose,
+  }),
+  // define your global modals
+  useContextModals: (useModal) => ({
+    myModal1: useModal(MyModal),
+    myModal2: useModal(MyModal, {
+      modalProps: {
+        maxWidth: "xs",
+      },
+    }),
+    myModal3: useModal(MyModal, {
+      defaultProps: { customMessage: "something" },
+    }),
+  }),
+});
+
+// three ways to consume modal
+const MyConsumer = () => {
+  // select single from global context
+  const [handleOpenMyModal1, handleCloseMyModal1] =
+    useModalContextSelector("myModal1");
+
+  // select multiple from global context
+  const {
+    myModal2: [handleOpenMyModal2],
+    myModal3: [handleOpenMyModal3],
+  } = useModalContext();
+
+  // use modal within component scope
+  const [MyModal4Node, handleOpenMyModal4] = useModal(MyModal);
+
+  return (
+    <div>
+      {MyModal4Node}
+      <button
+        onClick={() => {
+          handleOpenMyModal1({ customMessage: "modal1" });
+          handleOpenMyModal2({ customMessage: "modal2" });
+          handleOpenMyModal3({ customMessage: "modal3" });
+          handleOpenMyModal4({ customMessage: "modal4" });
+        }}
+      >
+        Open
+      </button>
+    </div>
+  );
+};
+```
+
+# Examples & Demo
+
+tbd CodePen
+
+- `MUI Dialog` example with custom way to disable backdrop click
+- React Native `react-native-modalize`
+
+# Documentations
+
+## makeModalControlSimpler
+
+tbd
+
+## useModal
+
+tbd
+
+## useModalContext
+
+tbd
+
+## useModalContextSelector
+
+tbd
+
+# Local Development
+
+## Prerequisites
+
+- NodeJS and NPM
+- Yarn
+- Editor/IDE that support TypeScript
+
+## Quick Start
+
+install dependencies using yarn
+
+```
+yarn
+```
+
+run test watch
+
+```
+yarn test
+```
+
+test build
+
+```
+yarn build
+```
