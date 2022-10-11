@@ -24,13 +24,28 @@ In React world, normally when you want to use a modal, you'll have to go through
 - Modal component continue to trigger re-rendering in close state
 - Modal content flickering during close transition caused by change modal state
 
-This library will resolve all the above issues by introduce a simpler modal control flow.
+This library addressed all the above issues by introduce a simpler modal control flow.
+
+# Quick Installation
+
+TODO: publish tbd
+
+```
+yarn add @catconsult/simplify-modal-control
+```
+
+or
+
+```
+npm i @catconsult/simplify-modal-control
+```
 
 # Quick Usage
 
 ```tsx
 // use MUI Dialog as Example, choose you favorite component wrapper
 import { Dialog, DialogContent } from "@mui/material";
+import makeModalControlSimpler from "@catconsult/simplify-modal-control";
 
 // define your modal
 const MyModal = ({
@@ -112,9 +127,9 @@ const MyConsumer = () => {
 };
 ```
 
-# Examples & Demo
+# Demo
 
-tbd CodePen
+TODO: add CodePen link and demo
 
 - `MUI Dialog` example with custom way to disable backdrop click
 - React Native `react-native-modalize`
@@ -123,19 +138,19 @@ tbd CodePen
 
 ## makeModalControlSimpler
 
-tbd
+TODO
 
 ## useModal
 
-tbd
+TODO
 
 ## useModalContext
 
-tbd
+TODO
 
 ## useModalContextSelector
 
-tbd
+TODO
 
 # Local Development
 
