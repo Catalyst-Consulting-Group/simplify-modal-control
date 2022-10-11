@@ -59,18 +59,21 @@ const {
   ModalWrapper: Dialog,
   // pass props to modal wrapper
   mapModalProps: ({ open, handleClose }, modalProps) => ({
+    ...modalProps,
     open,
-    onClose: customProps?.disableBackdropClick ? undefined : handleClose,
+    onClose: handleClose,
   }),
   // define your global modals
   useContextModals: (useModal) => ({
     myModal1: useModal(MyModal),
     myModal2: useModal(MyModal, {
       modalProps: {
+        // pass props to modal wrapper
         maxWidth: "xs",
       },
     }),
     myModal3: useModal(MyModal, {
+      // pass default props to modal content
       defaultProps: { customMessage: "something" },
     }),
   }),
