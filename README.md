@@ -6,7 +6,7 @@ Like the name suggested, this library is created to simplify modal control flow 
 
 - Handle open and close modal
 - Pass props into modal content
-- Declare reusable modals and access it using selector keys in any layer
+- Declare reusable modals and access it anywhere
 - Prevent data flickering during modal transition
 - Prevent re-rendering when modal is in close state
 - Super customizable, not tied to any modal components
