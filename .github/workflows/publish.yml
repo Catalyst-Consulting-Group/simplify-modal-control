@@ -26,7 +26,6 @@ jobs:
         uses: "phips28/gh-action-bump-version@master"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGEJSON_DIR: ${{ env.outputDir }}
       - name: "Publish"
         working-directory: ${{ env.outputDir }}
         run: |
