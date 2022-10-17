@@ -1,9 +1,7 @@
 name: Build Test
 
-on:
-  push:
-    branches:
-      - main
+on: workflow_dispatch
+
 env:
   outputDir: "./dist"
 
@@ -25,10 +23,6 @@ jobs:
         run: yarn test:ci
       - name: Run Build
         run: yarn build
-      - name: "Automated Version Bump"
-        uses: "phips28/gh-action-bump-version@master"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Publish"
         working-directory: ${{ env.outputDir }}
         run: |
