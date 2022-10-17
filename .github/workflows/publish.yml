@@ -1,0 +1,37 @@
+name: Build Test
+
+on:
+  push:
+    branches:
+      - main
+env:
+  outputDir: "./dist"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+      - name: Install dependencies
+        run: yarn
+      - name: Run Test
+        run: yarn test:ci
+      - name: Run Build
+        run: yarn build
+      - name: "Automated Version Bump"
+        uses: "phips28/gh-action-bump-version@master"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PACKAGEJSON_DIR: ${{ env.outputDir }}
+      - name: "Publish"
+        working-directory: ${{ env.outputDir }}
+        run: |
+          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
+          yarn publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
