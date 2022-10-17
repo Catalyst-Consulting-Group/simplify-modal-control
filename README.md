@@ -28,8 +28,6 @@ This library addressed all the above issues by introduce a simpler modal control
 
 # Quick Installation
 
-TODO: publish tbd
-
 ```
 yarn add @catconsult/simplify-modal-control
 ```

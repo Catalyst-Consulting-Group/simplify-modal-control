@@ -4,6 +4,9 @@
   "description": "Simplify React modal control flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "jest --watch",
     "test:ci": "jest --ci",
