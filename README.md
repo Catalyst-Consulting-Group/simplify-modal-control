@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/@catconsult%2Fsimplify-modal-control.svg)](https://badge.fury.io/js/@catconsult%2Fsimplify-modal-control)
+
 # simplify-modal-control
 
 Like the name suggested, this library is created to simplify modal control flow for React. Note, this library is for controlling modals, you still have to pick your favorite modal component as the wrapper.
