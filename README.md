@@ -138,19 +138,55 @@ TODO: add CodePen link and demo
 
 ## makeModalControlSimpler
 
-TODO
+```ts
+/**
+ * Make modal control simpler!
+ * @param options.ModalWrapper the modal wrapper component function
+ * @param options.mapModalProps function that return modal wrapper props
+ * @param options.onOpen function trigger when open modal
+ * @param options.onClose function trigger when close modal
+ * @param options.useHookValue custom hooks to return any hook value to be consumed by mapModalProps. Similar purpose as customValues
+ * @param options.useContextModals return modals to be use in modal context provider
+ *
+ * @returns { { useModal, useModalContext, useModalContextSelector, ModalContextProvider } }
+ */
+makeModalControlSimpler(options);
+```
 
 ## useModal
 
-TODO
+```ts
+/**
+ * @param ModalContent modal content component function
+ * @param options
+ * @param options.defaultProps props to feed modal content
+ * @param options.modalProps modal props
+ * @param options.customValues custom values to be consumed by mapModalProps. Similar purpose as useHookValue
+ * @returns { [ModalNode, handleOpen, handleClose] }
+ */
+useModal(MyModal, UseModalOptions);
+```
 
 ## useModalContext
 
-TODO
+```ts
+/**
+ *  Select all modal handlers from global modal context
+ *  @returns { { [modalKey]: [handleOpen, handleClose] } }
+ */
+useModalContext();
+```
 
 ## useModalContextSelector
 
-TODO
+```ts
+/**
+ *  Select a single modal open and close handler from global modal context
+ *  @param key modal key
+ *  @returns { [handleOpen, handleClose] }
+ */
+useModalContextSelector(key);
+```
 
 # Local Development
 
