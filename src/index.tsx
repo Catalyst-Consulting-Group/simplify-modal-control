@@ -11,7 +11,7 @@ import {
   Fragment,
   ReactNode,
   FC,
-} from "react";
+} from 'react';
 
 /**
  * Make modal control simpler!
@@ -72,14 +72,14 @@ const makeModalControlSimpler = <
   // remove first value ,Element, and leave only open and close handlers
   TModalContextValue extends {
     [K in TContextModalsKey]: [TContextModals[K][1], TContextModals[K][2]];
-  }
+  },
 >({
   ModalWrapper,
   mapModalProps,
   onOpen,
   onClose,
   useHookValue = EMPTY_FUNCTION as UseHookValueFn<THookValues>,
-  useContextModals = (_) => EMPTY_OBJECT as TContextModals,
+  useContextModals = _ => EMPTY_OBJECT as TContextModals,
 }: MakeModalControlSimplerProps<
   TModalProps,
   TCustomValues,
@@ -133,7 +133,7 @@ const makeModalControlSimpler = <
    */
   const useModal: UseModalFn<TModalProps, TCustomValues> = (
     ModalContent,
-    options
+    options,
   ) => {
     const defaultProps = options?.defaultProps;
 
@@ -147,7 +147,7 @@ const makeModalControlSimpler = <
         setProps(newProps);
         if (onOpen) onOpen(hookValues);
       },
-      [hookValues]
+      [hookValues],
     );
 
     const handleClose = useCallback(() => {
@@ -159,7 +159,7 @@ const makeModalControlSimpler = <
     const ModalContentMemo = useMemo(
       // prevent modal content rerender when modal is not open
       () => memo(ModalContent, (_, next) => !next.open),
-      [ModalContent]
+      [ModalContent],
     );
 
     const mappedModalProps = useMemo(
@@ -168,7 +168,7 @@ const makeModalControlSimpler = <
           { open, handleClose, handleOpen, setOpen, setProps },
           options?.modalProps,
           options?.customValues,
-          hookValues
+          hookValues,
         ),
       [
         handleClose,
@@ -177,7 +177,7 @@ const makeModalControlSimpler = <
         open,
         options?.customValues,
         options?.modalProps,
-      ]
+      ],
     );
 
     const modal = (
@@ -232,7 +232,7 @@ const makeModalControlSimpler = <
    * ```
    */
   const useModalContextSelector = <K extends TContextModalsKey>(
-    key: K
+    key: K,
   ): TModalContextValue[K] =>
     useContext(ModalContext)?.[key] || (EMPTY_LIST as TModalContextValue[K]);
 
@@ -264,7 +264,7 @@ const makeModalControlSimpler = <
           return acc;
         }, {} as TModalContextValue),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
+      [],
     );
 
     return (
@@ -301,24 +301,24 @@ export type UseModalReturnType<T = any> = [
   // handle open
   (newProps?: NewPropsType<T>) => void,
   // handle close
-  () => void
+  () => void,
 ];
 
-type NewPropsType<T> = Omit<T, "onClose">;
+type NewPropsType<T> = Omit<T, 'onClose'>;
 
 type UseModalFn<TModalProps, TCustomValues> = <
-  T extends Partial<DefaultModalProps>
+  T extends Partial<DefaultModalProps>,
 >(
   ModalContent: ComponentType<T>,
   options?: {
     defaultProps?: NewPropsType<T> | undefined;
     modalProps?: Partial<TModalProps> | undefined;
     customValues?: TCustomValues;
-  }
+  },
 ) => UseModalReturnType<T>;
 
 type UseContextModalsFn<TModalProps, TContextModals, TCustomValues> = (
-  useModal: UseModalFn<TModalProps, TCustomValues>
+  useModal: UseModalFn<TModalProps, TCustomValues>,
 ) => TContextModals;
 
 type UseHookValueFn<THookValues> = () => THookValues;
@@ -327,7 +327,7 @@ type MakeModalControlSimplerProps<
   TModalProps,
   TCustomValues,
   THookValues,
-  TContextModals
+  TContextModals,
 > = {
   ModalWrapper: ComponentType<TModalProps>;
   mapModalProps: <T>(
@@ -336,11 +336,11 @@ type MakeModalControlSimplerProps<
       handleClose: () => void;
       handleOpen: () => void;
       setOpen: Dispatch<SetStateAction<boolean>>;
-      setProps: Dispatch<SetStateAction<T>>;
+      setProps: Dispatch<SetStateAction<T | null | undefined>>;
     },
     modalProps?: Partial<TModalProps>,
     customValues?: TCustomValues,
-    hookValues?: THookValues
+    hookValues?: THookValues,
   ) => TModalProps;
   onOpen?: (hookValues?: THookValues) => void;
   onClose?: (hookValues?: THookValues) => void;

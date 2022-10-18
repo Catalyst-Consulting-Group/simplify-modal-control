@@ -1,9 +1,9 @@
 {
   "name": "@catconsult/simplify-modal-control",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Simplify React modal control flow",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "publishConfig": {
     "access": "public"
   },
