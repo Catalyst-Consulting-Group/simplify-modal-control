@@ -1,6 +1,6 @@
 {
   "name": "@catconsult/simplify-modal-control",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simplify React modal control flow",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
