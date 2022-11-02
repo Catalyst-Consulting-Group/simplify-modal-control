@@ -132,7 +132,7 @@ const MyConsumer = () => {
 TODO: add CodePen link and demo
 
 - `MUI Dialog` example with custom way to disable backdrop click
-- React Native `react-native-modalize`
+- [React Native `react-native-modalize`](https://snack.expo.dev/@dhananjay.soneji/catalyst-simplify-modal-control?platform=android)
 
 # Documentations
 
