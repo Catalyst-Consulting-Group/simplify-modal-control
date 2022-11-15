@@ -44,8 +44,8 @@ npm i @catconsult/simplify-modal-control
 
 ```tsx
 // use MUI Dialog as Example, choose you favorite component wrapper
-import { Dialog, DialogContent } from "@mui/material";
-import makeModalControlSimpler from "@catconsult/simplify-modal-control";
+import { Dialog, DialogContent } from '@mui/material';
+import makeModalControlSimpler from '@catconsult/simplify-modal-control';
 
 // define your modal
 const MyModal = ({
@@ -79,17 +79,17 @@ const {
     onClose: handleClose,
   }),
   // define your global modals
-  useContextModals: (useModal) => ({
+  useContextModals: useModal => ({
     myModal1: useModal(MyModal),
     myModal2: useModal(MyModal, {
       modalProps: {
         // pass props to modal wrapper
-        maxWidth: "xs",
+        maxWidth: 'xs',
       },
     }),
     myModal3: useModal(MyModal, {
       // pass default props to modal content
-      defaultProps: { customMessage: "something" },
+      defaultProps: { customMessage: 'something' },
     }),
   }),
 });
@@ -98,7 +98,7 @@ const {
 const MyConsumer = () => {
   // select single from global context
   const [handleOpenMyModal1, handleCloseMyModal1] =
-    useModalContextSelector("myModal1");
+    useModalContextSelector('myModal1');
 
   // select multiple from global context
   const {
@@ -114,24 +114,29 @@ const MyConsumer = () => {
       {MyModal4Node}
       <button
         onClick={() => {
-          handleOpenMyModal1({ customMessage: "modal1" });
-          handleOpenMyModal2({ customMessage: "modal2" });
-          handleOpenMyModal3({ customMessage: "modal3" });
-          handleOpenMyModal4({ customMessage: "modal4" });
-        }}
-      >
+          handleOpenMyModal1({ customMessage: 'modal1' });
+          handleOpenMyModal2({ customMessage: 'modal2' });
+          handleOpenMyModal3({ customMessage: 'modal3' });
+          handleOpenMyModal4({ customMessage: 'modal4' });
+        }}>
         Open
       </button>
     </div>
+  );
+};
+
+export const App = () => {
+  return (
+    <ModalContextProvider>
+      <MyConsumer />
+    </ModalContextProvider>
   );
 };
 ```
 
 # Demo
 
-TODO: add CodePen link and demo
-
-- `MUI Dialog` example with custom way to disable backdrop click
+- [`React` + `MUI Dialog`](https://codesandbox.io/s/objective-agnesi-wercyl?file=/src/App.tsx)
 - [React Native `react-native-modalize`](https://snack.expo.dev/@dhananjay.soneji/catalyst-simplify-modal-control?platform=android)
 
 # Documentations
