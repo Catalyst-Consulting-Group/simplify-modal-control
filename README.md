@@ -181,11 +181,11 @@ openModal(key, newProps);
 
 ````ts
 /**
- * Open modal without using hooks
+ * Close modal without using hooks
  * @param key modal key
  * @example
  * ```ts
- * openModal("fooModal", {fooProp:"pass in props to the modal"});
+ * closeModal("fooModal");
  * ```
  */
 closeModal(key);
