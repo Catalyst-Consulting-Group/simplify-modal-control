@@ -219,7 +219,7 @@ const makeModalControlSimpler = <
 
   /**
    * Select a single modal open and close handler from global modal context
-   *
+   * @param key modal key
    * @example
    * ```ts
    * const [handleOpen, handleClose] = useModalContextSelector("fooModal")
@@ -235,6 +235,39 @@ const makeModalControlSimpler = <
     key: K,
   ): TModalContextValue[K] =>
     useContext(ModalContext)?.[key] || (EMPTY_LIST as TModalContextValue[K]);
+
+  /**
+   * This section allows open/close context modals without using hook
+   */
+  let modalContextHandlersRef: TModalContextValue;
+
+  /**
+   * Open modal without using hooks
+   * @param key modal key
+   * @param newProps modal props
+   * @example
+   * ```ts
+   * openModal("fooModal", {fooProp:"pass in props to the modal"});
+   * ```
+   */
+  const openModal = <K extends TContextModalsKey>(
+    key: K,
+    newProps?: Parameters<TModalContextValue[K][0]>[0],
+  ) => {
+    modalContextHandlersRef?.[key][0](newProps);
+  };
+
+  /**
+   * Close modal without using hooks
+   * @param key modal key
+   * @example
+   * ```ts
+   * closeModal("fooModal");
+   * ```
+   */
+  const closeModal = <K extends TContextModalsKey>(key: K) => {
+    modalContextHandlersRef?.[key][1]();
+  };
 
   /**
    * A global context provider to store reusable modals
@@ -258,11 +291,14 @@ const makeModalControlSimpler = <
     // context value will be map of handlers. Only need to initialize once
     const contextValue = useMemo(
       () =>
-        Object.entries(modals).reduce((acc, [key, [_, ...handlers]]) => {
-          acc[key as TContextModalsKey] =
-            handlers as TModalContextValue[TContextModalsKey];
-          return acc;
-        }, {} as TModalContextValue),
+        (modalContextHandlersRef = Object.entries(modals).reduce(
+          (acc, [key, [_, ...handlers]]) => {
+            acc[key as TContextModalsKey] =
+              handlers as TModalContextValue[TContextModalsKey];
+            return acc;
+          },
+          {} as TModalContextValue,
+        )),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [],
     );
@@ -282,6 +318,8 @@ const makeModalControlSimpler = <
     ModalContextProvider,
     useModalContext,
     useModalContextSelector,
+    openModal,
+    closeModal,
   };
 };
 

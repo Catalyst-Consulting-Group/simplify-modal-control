@@ -158,6 +158,35 @@ export const App = () => {
 makeModalControlSimpler(options);
 ```
 
+## openModal
+
+````ts
+/**
+ * Open modal without using hooks
+ * @param key modal key
+ * @param newProps modal props
+ * @example
+ * ```ts
+ * openModal("fooModal", {fooProp:"pass in props to the modal"});
+ * ```
+ */
+openModal(key, newProps);
+````
+
+## closeModal
+
+````ts
+/**
+ * Open modal without using hooks
+ * @param key modal key
+ * @example
+ * ```ts
+ * openModal("fooModal", {fooProp:"pass in props to the modal"});
+ * ```
+ */
+closeModal(key);
+````
+
 ## useModal
 
 ```ts
