@@ -70,6 +70,8 @@ const {
   useModalContextSelector,
   useModalContext,
   ModalContextProvider,
+  openModal,
+  closeModal,
 } = makeModalControlSimpler({
   ModalWrapper: Dialog,
   // pass props to modal wrapper
@@ -80,6 +82,7 @@ const {
   }),
   // define your global modals
   useContextModals: useModal => ({
+    myModal0: useModal(MyModal),
     myModal1: useModal(MyModal),
     myModal2: useModal(MyModal, {
       modalProps: {
@@ -114,6 +117,7 @@ const MyConsumer = () => {
       {MyModal4Node}
       <button
         onClick={() => {
+          openModal('modal0', { customMessage: 'modal0' });
           handleOpenMyModal1({ customMessage: 'modal1' });
           handleOpenMyModal2({ customMessage: 'modal2' });
           handleOpenMyModal3({ customMessage: 'modal3' });
