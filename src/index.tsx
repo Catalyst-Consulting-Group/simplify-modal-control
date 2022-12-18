@@ -140,11 +140,16 @@ const makeModalControlSimpler = <
     const hookValues = useHookValue();
     const [open, setOpen] = useState(Boolean(defaultProps?.open));
     const [props, setProps] = useState<any>();
+    const [modalProps, setModalProps] = useState<Partial<TModalProps>>();
 
     const handleOpen = useCallback(
-      (newProps?: typeof defaultProps) => {
+      (
+        newProps?: typeof defaultProps,
+        newModalProps?: Partial<TModalProps>,
+      ) => {
         setOpen(true);
-        setProps(newProps);
+        if (newProps) setProps(newProps);
+        if (newModalProps) setModalProps(newModalProps);
         if (onOpen) onOpen(hookValues);
       },
       [hookValues],
@@ -153,6 +158,7 @@ const makeModalControlSimpler = <
     const handleClose = useCallback(() => {
       setOpen(false);
       setProps(undefined);
+      setModalProps(undefined);
       if (onClose) onClose(hookValues);
     }, [hookValues]);
 
@@ -181,12 +187,13 @@ const makeModalControlSimpler = <
     );
 
     const modal = (
-      <ModalWrapper {...mappedModalProps}>
+      <ModalWrapper {...mappedModalProps} {...modalProps}>
         <ModalContentMemo
           {...defaultProps}
           {...props}
           open={open}
           onClose={handleClose}
+          setModalProps={setModalProps}
         />
       </ModalWrapper>
     );
@@ -244,7 +251,8 @@ const makeModalControlSimpler = <
   /**
    * Open modal without using hooks
    * @param key modal key
-   * @param newProps modal props
+   * @param newProps modal content props
+   * @param newModalProps modal props
    * @example
    * ```ts
    * openModal("fooModal", {fooProp:"pass in props to the modal"});
@@ -253,8 +261,9 @@ const makeModalControlSimpler = <
   const openModal = <K extends TContextModalsKey>(
     key: K,
     newProps?: Parameters<TModalContextValue[K][0]>[0],
+    newModalProps?: Partial<TModalProps>,
   ) => {
-    modalContextHandlersRef?.[key][0](newProps);
+    modalContextHandlersRef?.[key][0](newProps, newModalProps);
   };
 
   /**
@@ -331,13 +340,14 @@ export default makeModalControlSimpler;
 export type DefaultModalProps = {
   onClose: () => void;
   open?: boolean;
+  setModalProps?: (modalProps: any) => void;
 };
 
-export type UseModalReturnType<T = any> = [
+export type UseModalReturnType<T = any, TModal = any> = [
   // modal element
   JSX.Element,
   // handle open
-  (newProps?: NewPropsType<T>) => void,
+  (newProps?: NewPropsType<T>, newModalProps?: Partial<TModal>) => void,
   // handle close
   () => void,
 ];
@@ -353,7 +363,7 @@ type UseModalFn<TModalProps, TCustomValues> = <
     modalProps?: Partial<TModalProps> | undefined;
     customValues?: TCustomValues;
   },
-) => UseModalReturnType<T>;
+) => UseModalReturnType<T, TModalProps>;
 
 type UseContextModalsFn<TModalProps, TContextModals, TCustomValues> = (
   useModal: UseModalFn<TModalProps, TCustomValues>,

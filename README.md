@@ -118,7 +118,7 @@ const MyConsumer = () => {
       <button
         onClick={() => {
           openModal('modal0', { customMessage: 'modal0' });
-          handleOpenMyModal1({ customMessage: 'modal1' });
+          handleOpenMyModal1({ customMessage: 'modal1' }, { maxWidth: 'lg' });
           handleOpenMyModal2({ customMessage: 'modal2' });
           handleOpenMyModal3({ customMessage: 'modal3' });
           handleOpenMyModal4({ customMessage: 'modal4' });
@@ -168,13 +168,14 @@ makeModalControlSimpler(options);
 /**
  * Open modal without using hooks
  * @param key modal key
- * @param newProps modal props
+ * @param newProps modal content props
+ * @param newModalProps modal props
  * @example
  * ```ts
- * openModal("fooModal", {fooProp:"pass in props to the modal"});
+ * openModal("fooModal", {fooProp:"pass in props to the modal"}, { maxWidth:"lg" });
  * ```
  */
-openModal(key, newProps);
+openModal(key, newProps, newModalProps);
 ````
 
 ## closeModal
