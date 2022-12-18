@@ -1,9 +1,9 @@
-import React from "react";
-import { act, renderHook } from "@testing-library/react";
-import { useModal } from "./setup";
-import { DefaultModalProps } from "../src";
+import React from 'react';
+import { act, renderHook } from '@testing-library/react';
+import { useModal } from './setup';
+import { DefaultModalProps } from '../src';
 
-it("Should open and close without any custom props", () => {
+it('Should open and close without any custom props', () => {
   const Test = () => (
     <div>
       <p>Hello World</p>
@@ -18,9 +18,13 @@ it("Should open and close without any custom props", () => {
       open: false,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 
   act(() => {
@@ -34,9 +38,13 @@ it("Should open and close without any custom props", () => {
       open: true,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: true, onClose: expect.any(Function) },
+        props: {
+          open: true,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 
   act(() => {
@@ -50,20 +58,24 @@ it("Should open and close without any custom props", () => {
       open: false,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 });
 
-it("Should open by default using defaultProps", () => {
+it('Should open by default using defaultProps', () => {
   const Test = () => (
     <div>
       <p>Hello World</p>
     </div>
   );
   const { result } = renderHook(() =>
-    useModal(Test, { defaultProps: { open: true } })
+    useModal(Test, { defaultProps: { open: true } }),
   );
 
   // defaultProps ==> {open: true} always opens the modal
@@ -73,9 +85,13 @@ it("Should open by default using defaultProps", () => {
       open: true,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: true, onClose: expect.any(Function) },
+        props: {
+          open: true,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 
   act(() => {
@@ -89,13 +105,17 @@ it("Should open by default using defaultProps", () => {
       open: false,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 });
 
-it("Should open with custom props passed in openModel function", () => {
+it('Should open with custom props passed in openModel function', () => {
   const Test = (props: { test: string } & DefaultModalProps) => (
     <div>
       <p>Hello World</p>
@@ -110,14 +130,18 @@ it("Should open with custom props passed in openModel function", () => {
       open: false,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 
   act(() => {
     // open modal with custom prop
-    result.current[1]({ test: "newProp" });
+    result.current[1]({ test: 'newProp' });
   });
 
   expect(result.current[0].props).toEqual(
@@ -126,9 +150,14 @@ it("Should open with custom props passed in openModel function", () => {
       open: true,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: true, onClose: expect.any(Function), test: "newProp" },
+        props: {
+          open: true,
+          onClose: expect.any(Function),
+          test: 'newProp',
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 
   act(() => {
@@ -143,13 +172,17 @@ it("Should open with custom props passed in openModel function", () => {
       open: false,
       onClose: expect.any(Function),
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 });
 
-it("Should disableBackdropClick dialogs props passed in usedModel", () => {
+it('Should disableBackdropClick dialogs props passed in usedModel', () => {
   const Test = () => (
     <div>
       <p>Hello World</p>
@@ -160,7 +193,7 @@ it("Should disableBackdropClick dialogs props passed in usedModel", () => {
       customValues: {
         disableBackdropClick: true,
       },
-    })
+    }),
   );
 
   // BackdropClick should be disable: undefined
@@ -170,8 +203,12 @@ it("Should disableBackdropClick dialogs props passed in usedModel", () => {
       open: false,
       onClose: undefined,
       children: expect.objectContaining({
-        props: { open: false, onClose: expect.any(Function) },
+        props: {
+          open: false,
+          onClose: expect.any(Function),
+          setModalProps: expect.any(Function),
+        },
       }),
-    })
+    }),
   );
 });
