@@ -1,16 +1,15 @@
 {
-    "compilerOptions": {
-      "strict": true,
-      "jsx": "react-jsx",
-      "declaration": true,
-      "esModuleInterop": true,
-      "outDir": "dist",
-      "target": "es6",
-      "lib": ["esnext"],
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "declarationMap": true,
-      "sourceMap": true,
-    },
-    "include": ["src"]
-  }
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "target": "es6",
+    "lib": ["esnext"],
+    "module": "commonjs",
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src"]
+}
