@@ -11,6 +11,7 @@ import {
   Fragment,
   ReactNode,
   FC,
+  JSX,
 } from 'react';
 
 /**
