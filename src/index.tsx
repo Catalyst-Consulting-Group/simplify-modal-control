@@ -12,6 +12,10 @@ import {
   ReactNode,
   FC,
   JSX,
+  Suspense,
+  lazy,
+  useRef,
+  Component,
 } from 'react';
 
 /**
@@ -22,6 +26,7 @@ import {
  * @param options.onClose function trigger when close modal
  * @param options.useHookValue custom hooks to return any hook value to be consumed by mapModalProps. Similar purpose as customValues
  * @param options.useContextModals return modals to be use in modal context provider
+ * @param options.registry modals registered with `registerModal` / `registerLazyModal`, plus a default loading `fallback`
  *
  * @example
  * ```ts
@@ -67,13 +72,8 @@ const makeModalControlSimpler = <
   TCustomValues,
   THookValues,
   // infer type for modals
-  TContextModals extends Record<string, UseModalReturnType>,
-  TContextModalsKey extends keyof TContextModals,
-  // transform infer useContextModals return map type value type
-  // remove first value ,Element, and leave only open and close handlers
-  TModalContextValue extends {
-    [K in TContextModalsKey]: [TContextModals[K][1], TContextModals[K][2]];
-  },
+  TContextModals extends Record<string, UseModalReturnType> = {},
+  TRegistry extends readonly RegisteredModal[] = [],
 >({
   ModalWrapper,
   mapModalProps,
@@ -81,12 +81,21 @@ const makeModalControlSimpler = <
   onClose,
   useHookValue = EMPTY_FUNCTION as UseHookValueFn<THookValues>,
   useContextModals = _ => EMPTY_OBJECT as TContextModals,
+  registry,
 }: MakeModalControlSimplerProps<
   TModalProps,
   TCustomValues,
   THookValues,
-  TContextModals
+  TContextModals,
+  TRegistry
 >) => {
+  type TModalContextValue = ModalContextValue<
+    TContextModals,
+    TRegistry,
+    TModalProps
+  >;
+  type TContextModalsKey = keyof TModalContextValue;
+
   /**
    *
    * @param ModalContent modal content component function
@@ -202,6 +211,39 @@ const makeModalControlSimpler = <
     return [modal, handleOpen, handleClose];
   };
 
+  const registryKeys = new Set<string>();
+  const registeredModals = (registry?.modals ?? []).map(modal => {
+    if (registryKeys.has(modal.key))
+      throw new Error(
+        `simplify-modal-control: duplicate modal key "${modal.key}"`,
+      );
+    registryKeys.add(modal.key);
+    return {
+      ...modal,
+      component: modal.loader
+        ? withSuspense(
+            modal.loader,
+            modal.options?.fallback ?? registry?.fallback ?? null,
+          )
+        : modal.component!,
+    };
+  });
+
+  type RegistryHandlerMap = Record<string, UseModalReturnType | undefined>;
+
+  // one component per registered modal keeps hook order stable
+  const RegisteredModalHost = ({
+    modal,
+    handlers,
+  }: {
+    modal: (typeof registeredModals)[number];
+    handlers: RegistryHandlerMap;
+  }) => {
+    const result = useModal(modal.component, modal.options as any);
+    handlers[modal.key] = result;
+    return result[0];
+  };
+
   const ModalContext = createContext<TModalContextValue>(EMPTY_OBJECT);
 
   /**
@@ -297,26 +339,40 @@ const makeModalControlSimpler = <
     children: ReactNode;
   }> = ({ children }) => {
     const modals = useContextModals(useModal);
+    for (const key of registryKeys)
+      if (key in modals)
+        throw new Error(`simplify-modal-control: duplicate modal key "${key}"`);
+
+    // latest handlers reported by each RegisteredModalHost
+    const registryHandlers = useRef<RegistryHandlerMap>({}).current;
 
     // context value will be map of handlers. Only need to initialize once
-    const contextValue = useMemo(
-      () =>
-        (modalContextHandlersRef = Object.entries(modals).reduce(
-          (acc, [key, [_, ...handlers]]) => {
-            acc[key as TContextModalsKey] =
-              handlers as TModalContextValue[TContextModalsKey];
-            return acc;
-          },
-          {} as TModalContextValue,
-        )),
+    const contextValue = useMemo(() => {
+      const value: Record<string, unknown> = {};
+      for (const [key, [_, ...handlers]] of Object.entries(modals))
+        value[key] = handlers;
+      // stable proxies that always call the host's latest handlers
+      for (const key of registryKeys)
+        value[key] = [
+          (...args: Parameters<UseModalReturnType[1]>) =>
+            registryHandlers[key]?.[1](...args),
+          () => registryHandlers[key]?.[2](),
+        ];
+      return (modalContextHandlersRef = value as TModalContextValue);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [],
-    );
+    }, []);
 
     return (
       <ModalContext.Provider value={contextValue}>
         {Object.values(modals).map(([modalNode], i) => (
           <Fragment key={i}>{modalNode}</Fragment>
+        ))}
+        {registeredModals.map(modal => (
+          <RegisteredModalHost
+            key={modal.key}
+            modal={modal}
+            handlers={registryHandlers}
+          />
         ))}
         {children}
       </ModalContext.Provider>
@@ -334,6 +390,111 @@ const makeModalControlSimpler = <
 };
 
 export default makeModalControlSimpler;
+
+/**
+ * Register a modal in its own file, then pass it to
+ * `makeModalControlSimpler({ registry: { modals: [...] } })`.
+ * Use for regular components, including `next/dynamic` components.
+ *
+ * @example
+ * ```ts
+ * export const confirm = registerModal('confirm', ConfirmModal, {
+ *   defaultProps: { message: 'Are you sure?' },
+ *   modalProps: { maxWidth: 'xs' },
+ * });
+ * ```
+ */
+export const registerModal = <
+  K extends string,
+  T extends Partial<DefaultModalProps>,
+>(
+  key: K,
+  component: ComponentType<T> & DeclaredComponent<K>,
+  options?: RegisterModalOptions<T>,
+): RegisteredModal<K, T> => ({ key, component, options });
+
+/**
+ * Register a lazily loaded modal. The loader runs the first time the modal opens;
+ * `fallback` (or the registry's default fallback) shows while it loads.
+ *
+ * @example
+ * ```ts
+ * export const findTraining = registerLazyModal(
+ *   'findTraining',
+ *   () => import('./FindTrainingModal'),
+ *   { modalProps: { maxWidth: 'md' }, fallback: <Spinner /> },
+ * );
+ * ```
+ */
+
+export const registerLazyModal = <
+  K extends string,
+  T extends Partial<DefaultModalProps>,
+>(
+  key: K,
+  loader: () => Promise<{ default: ComponentType<T> & DeclaredComponent<K> }>,
+  options?: RegisterLazyModalOptions<T>,
+): RegisteredModal<K, T> => {
+  const registration: RegisteredModal<K, T> = {
+    key,
+    options,
+    loader: () =>
+      loader().then(module => {
+        // the loaded module exports this registration: it lives in the modal's own file, so the modal was never split out
+        if ((Object.values(module) as unknown[]).includes(registration))
+          console.error(
+            `simplify-modal-control: registerLazyModal("${key}") is in the same file it lazy-loads, so the modal is bundled eagerly. Move the registration to a separate file.`,
+          );
+        return module;
+      }),
+  };
+  return registration;
+};
+
+// keeps a failed load (or render) inside its own modal instead of unmounting the whole app
+class LoadErrorBoundary extends Component<
+  { onError: () => void; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+// mount the lazy component only after the first open, so its chunk is not loaded on app start
+const withSuspense = (
+  loader: () => Promise<{ default: ComponentType<any> }>,
+  fallback: ReactNode,
+): ComponentType<any> => {
+  let LazyContent = lazy(loader);
+  const SuspenseContent = (props: any) => {
+    const [opened, setOpened] = useState(Boolean(props.open));
+    // props object seen when loading failed; a new one means the modal was opened again
+    const [failedProps, setFailedProps] = useState<unknown>();
+    if (props.open && !opened) setOpened(true);
+    if (!opened || failedProps === props) return null;
+    return (
+      <LoadErrorBoundary
+        onError={() => {
+          LazyContent = lazy(loader); // React.lazy caches the rejection; a new one retries
+          setFailedProps(props);
+          props.onClose();
+        }}>
+        <Suspense fallback={fallback}>
+          <LazyContent {...props} />
+        </Suspense>
+      </LoadErrorBoundary>
+    );
+  };
+  return SuspenseContent;
+};
 
 /**
  * Types
@@ -354,6 +515,71 @@ export type UseModalReturnType<T = any, TModal = any> = [
 ];
 
 type NewPropsType<T> = Omit<T, 'onClose'>;
+
+export type RegisterModalOptions<T> = {
+  defaultProps?: NewPropsType<T>;
+  // shortcut: not checked against the wrapper props (a register file can't import the factory without a cycle); openModal's 3rd arg is checked.
+  modalProps?: Record<string, any>;
+  customValues?: any;
+};
+
+export type RegisterLazyModalOptions<T> = RegisterModalOptions<T> & {
+  /** shown while the modal content loads; overrides `registry.fallback` */
+  fallback?: ReactNode;
+};
+
+export type RegisteredModal<K extends string = string, T = any> = {
+  key: K;
+  component?: ComponentType<T>;
+  loader?: () => Promise<{ default: ComponentType<T> }>;
+  options?: RegisterLazyModalOptions<T>;
+};
+
+/**
+ * Declare registered modal keys and their props once, for the whole app, with module augmentation.
+ * Declared keys are typed in `openModal`, `closeModal` and the context hooks without
+ * passing a typed `registry.modals` array, and `registerModal` checks the component against them.
+ *
+ * @example
+ * ```ts
+ * declare module '@catconsult/simplify-modal-control' {
+ *   interface ModalRegistry {
+ *     confirm: ConfirmModalProps;
+ *   }
+ * }
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ModalRegistry {}
+
+// a declared key's component must accept the declared props
+type DeclaredComponent<K> = K extends keyof ModalRegistry
+  ? ComponentType<ModalRegistry[K] & DefaultModalProps>
+  : unknown;
+
+type ModalContextValue<
+  TContextModals extends Record<string, UseModalReturnType>,
+  TRegistry extends readonly RegisteredModal[],
+  TModalProps,
+> = {
+  // keep only the open and close handlers of each context modal
+  [K in keyof TContextModals]: [TContextModals[K][1], TContextModals[K][2]];
+} & {
+  [K in keyof ModalRegistry]: [
+    UseModalReturnType<ModalRegistry[K], TModalProps>[1],
+    UseModalReturnType<ModalRegistry[K], TModalProps>[2],
+  ];
+} & {
+  // a `RegisteredModal[]`-typed array has no literal keys; it adds none (use ModalRegistry instead)
+  [R in TRegistry[number] as string extends R['key']
+    ? never
+    : R['key']]: R extends RegisteredModal<string, infer T>
+    ? [
+        UseModalReturnType<T, TModalProps>[1],
+        UseModalReturnType<T, TModalProps>[2],
+      ]
+    : never;
+};
 
 type UseModalFn<TModalProps, TCustomValues> = <
   T extends Partial<DefaultModalProps>,
@@ -377,6 +603,7 @@ type MakeModalControlSimplerProps<
   TCustomValues,
   THookValues,
   TContextModals,
+  TRegistry,
 > = {
   ModalWrapper: ComponentType<TModalProps>;
   mapModalProps: <T>(
@@ -399,6 +626,11 @@ type MakeModalControlSimplerProps<
     TContextModals,
     TCustomValues
   >;
+  registry?: {
+    modals: TRegistry;
+    /** default loading fallback for lazy modals */
+    fallback?: ReactNode;
+  };
 };
 
 const EMPTY_LIST = [] as any;
