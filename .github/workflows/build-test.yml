@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20.x'
+          node-version: '24.x'
       - name: Install dependencies
-        run: yarn
+        run: npm ci
       - name: Run Test
-        run: yarn test:ci
+        run: npm run test:ci
       - name: Run Build
-        run: yarn build
+        run: npm run build

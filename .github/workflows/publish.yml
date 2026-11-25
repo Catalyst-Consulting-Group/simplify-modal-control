@@ -2,32 +2,31 @@ name: Publish
 
 on: workflow_dispatch
 
-env:
-  outputDir: './dist'
+# npm trusted publishing: authenticates with GitHub OIDC, no NPM token secret
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
-          ref: ${{ github.ref }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20.x'
+          node-version: '24.x'
+      # trusted publishing needs npm 11.5.1 or later
+      - name: Update npm
+        run: npm install -g npm@11
       - name: Install dependencies
-        run: yarn
+        run: npm ci
       - name: Run Test
-        run: yarn test:ci
+        run: npm run test:ci
       - name: Run Build
-        run: yarn build
-      - name: 'Publish'
-        working-directory: ${{ env.outputDir }}
-        run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > .npmrc
-          yarn publish
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run build
+      - name: Publish
+        working-directory: ./dist
+        run: npm publish
